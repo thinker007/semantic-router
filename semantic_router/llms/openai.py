@@ -17,18 +17,23 @@ class OpenAILLM(BaseLLM):
     def __init__(
         self,
         name: Optional[str] = None,
+        openai_base_url: Optional[str] = None,
         openai_api_key: Optional[str] = None,
+        openai_org_id: Optional[str] = None,
         temperature: float = 0.01,
         max_tokens: int = 200,
     ):
         if name is None:
             name = EncoderDefault.OPENAI.value["language_model"]
         super().__init__(name=name)
+        base_url = openai_base_url or os.getenv("OPENAI_BASE_URL")
         api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
+        openai_org_id = openai_org_id or os.getenv("OPENAI_ORG_ID")
+        
         if api_key is None:
             raise ValueError("OpenAI API key cannot be 'None'.")
         try:
-            self.client = openai.OpenAI(api_key=api_key)
+            self.client = openai.OpenAI(base_url=base_url,api_key=api_key,organization=openai_org_id)
         except Exception as e:
             raise ValueError(
                 f"OpenAI API client failed to initialize. Error: {e}"
